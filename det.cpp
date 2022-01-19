@@ -6,9 +6,14 @@
 #include <iostream>
 #include <unistd.h>
 #include <ctime>
+#include <chrono>
 //#include <boost/filesystem.hpp> 
 
-
+/* 
+plans for the future:
+maybe add statistics of how long they stay, how often they visit (busy days, busy hours, etc) 
+add filesystems 
+*/
 
 
 using namespace cv;
@@ -16,7 +21,7 @@ using namespace std;
 
 const int port = 0;
 const int cntrArea = 10000;
-const string path = "path\\to\\the\\folder";
+const string path = "path\\to\\the\\folder\\";
 
 const int yr = 1900;
 
@@ -27,18 +32,21 @@ int main(int argc, char **argv)
     vector<vector<Point> > cnts;
     /* open camera */
     auto camera = VideoCapture(port);
-    
+   
+    /* make the video size smaller to process faster */
     camera.set(3, 512);
     camera.set(4, 288);
 
-    //sleep(20);
+   
     sleep(3);
     camera.read(frame);
-    
+   
     /* capture the first frame and convert to greyscale*/
     
     cvtColor(frame, firstFrame, COLOR_BGR2GRAY);
     GaussianBlur(firstFrame, firstFrame, Size(21, 21), 0);
+    
+    auto start = chrono::steady_clock::now();
     
     /* new frames */
     while(camera.read(frame)) {
@@ -60,13 +68,21 @@ int main(int argc, char **argv)
             
             if(contourArea(cnts[i]) < cntrArea/2 or contourArea(cnts[i]) > 5*cntrArea) {
                 /* not detected */
+                auto end = chrono::steady_clock::now();
+                auto dur = chrono::duration_cast<chrono::minutes>(end - start).count();
+                if (dur >= 15) {
+                    /* new firstFrame */
+                    /* it helps with NOT detecting change of sky colour as "motion" */
+                    camera.read(frame);    
+                    cvtColor(frame, firstFrame, COLOR_BGR2GRAY);
+                    GaussianBlur(firstFrame, firstFrame, Size(21, 21), 0);
+                    /* new start time */
+                    start = chrono::steady_clock::now();
+                }
                 continue;
             }
 
-            // auto rect = boundingRect(cnts[i]);
-            // rectangle(frame, rect, (0, 0, 255), 2);
-
-            // putText(frame, "Intruder Alert", Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0,0,255), 2);
+            
             /* save frame as image */
             //++ count;
             time_t now = time(0);
@@ -74,25 +90,25 @@ int main(int argc, char **argv)
             auto year = yr + ltm->tm_year;
             auto month =  1 + ltm->tm_mon;
             auto day = ltm->tm_mday;
-            
+            // time?
             auto hour = ltm->tm_hour;
             auto mint = ltm->tm_min;
             auto sec  = ltm->tm_sec;
             string fpath = std::to_string(year) + "\\" + std::to_string(month) + "\\" + std::to_string(day) + "\\";
             string name = "IMG_" + std::to_string(hour) + std::to_string(mint) + std::to_string(sec) + ".png";    
-            /* create directory if doesn't exist */ 
-            namespace fs = std::filesystem;
+            // create directory if doesn't exist 
+            // //namespace fs = std::filesystem;
 
-            try {
-                fs.create_directories(path+fpath);
-            }
-            catch (std::exception& e) { 
-                std::cout << e.what() << std::endl;
-            }
+            // try {
+            //     fs.create_directories(path+fpath);
+            // }
+            // catch (std::exception& e) { // Not using fs::filesystem_error since std::bad_alloc can throw too.
+            //     std::cout << e.what() << std::endl;
+            // }
             
 
 
-            imwrite(path + fpath + name, frame);
+            imwrite(path + name, frame);
             //sleep(3);
             putText(frame, "Intruder Alert", Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0,0,255), 2);
             auto rect = boundingRect(cnts[i]);
