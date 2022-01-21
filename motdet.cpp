@@ -71,8 +71,11 @@ vector<vector<Point> > compare(Mat& firstFrame, Mat& frame)
 
 vector<vector<Point> > backgroundSubtrCompare(Mat& frame, Ptr<BackgroundSubtractor> pBackSub)
 {
+    cvtColor(frame, gray, COLOR_BGR2GRAY);
+    //equalizeHist(gray, gray);
+    GaussianBlur(gray, gray, Size(21, 21), 0);
 
-    pBackSub->apply(frame, fmask);
+    pBackSub->apply(gray, fmask);
         
     //imshow("FG Mask", fmask);
 
