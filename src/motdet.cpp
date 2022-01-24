@@ -34,6 +34,11 @@ string pretty(int val)
     return std::string(2 - std::min(2, int(str.length())), '0') + str;
 }
 
+bool motCond(int cntrArea)
+{
+    return (cntrArea < minArea or cntrArea > maxArea);
+}
+
 void save(Mat& frame) 
 {
     time_t now = time(0);
@@ -98,7 +103,7 @@ void detBackSub(VideoCapture& camera)
         /* check */
         for (int i = 0; i < cnts.size(); i++) {
             
-            if(contourArea(cnts[i]) < minArea or contourArea(cnts[i]) > maxArea) {
+            if (motCond(contourArea(cnts[i]))) {
                 continue;
             }
 
@@ -141,7 +146,7 @@ void det(VideoCapture& camera)
         /* check */
         for (int i = 0; i < cnts.size(); i++) {
             
-            if(contourArea(cnts[i]) < minArea or contourArea(cnts[i]) > maxArea) {
+            if (motCond(contourArea(cnts[i]))) {
                 /* not detected */
                 auto end = chrono::steady_clock::now();
                 auto dur = chrono::duration_cast<chrono::minutes>(end - start).count();
