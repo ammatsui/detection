@@ -10,7 +10,6 @@
 
 /* notes:
 maybe use stringstreams instead of `pretty`;
-maybe better conditions for `cntrArea`;
 add filesystems;
 */
 
@@ -18,7 +17,8 @@ using namespace cv;
 using namespace std;
 
 const int port = 0;
-const int cntrArea = 10000;
+const int minArea = 5000;
+const int maxArea = 50000;
 const string path = "path\\to\\the\\folder";
 
 const int yr = 1900;
@@ -98,7 +98,7 @@ void detBackSub(VideoCapture& camera)
         /* check */
         for (int i = 0; i < cnts.size(); i++) {
             
-            if(contourArea(cnts[i]) < cntrArea/2 or contourArea(cnts[i]) > 5*cntrArea) {
+            if(contourArea(cnts[i]) < minArea or contourArea(cnts[i]) > maxArea) {
                 continue;
             }
 
@@ -141,7 +141,7 @@ void det(VideoCapture& camera)
         /* check */
         for (int i = 0; i < cnts.size(); i++) {
             
-            if(contourArea(cnts[i]) < cntrArea/2 or contourArea(cnts[i]) > 5*cntrArea) {
+            if(contourArea(cnts[i]) < minArea or contourArea(cnts[i]) > maxArea) {
                 /* not detected */
                 auto end = chrono::steady_clock::now();
                 auto dur = chrono::duration_cast<chrono::minutes>(end - start).count();
