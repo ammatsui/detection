@@ -53,8 +53,8 @@ void save(Mat& frame)
     auto mint = ltm->tm_min;
     auto sec  = ltm->tm_sec;
      
-    string fpath = pretty(year) + "\\" + pretty(month) + "\\" + pretty(day) + "\\";
-    string name = "IMG_" + pretty(hour) + pretty(mint) + pretty(sec) + ".png";  
+    string fpath = pretty(day) + pretty(month) + pretty(year) + "_";
+    string name = "IMG_" + fpath + pretty(hour) + pretty(mint) + pretty(sec) + ".png";  
               
     imwrite(path + name, frame);
 }
