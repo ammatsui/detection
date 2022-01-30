@@ -8,7 +8,7 @@
 #include <ctime>
 #include <chrono>
 
-/* notes:
+/* ToDo notes:
 maybe use stringstreams instead of `pretty`;
 add filesystems;
 */
@@ -20,6 +20,8 @@ const int port = 0;
 const int minArea = 5000;
 const int maxArea = 50000;
 const string path = "path\\to\\the\\folder";
+
+const int timeInt = 1;
 
 const int yr = 1900;
 
@@ -149,9 +151,10 @@ void det(VideoCapture& camera)
             if (motCond(contourArea(cnts[i]))) {
                 /* not detected */
                 auto end = chrono::steady_clock::now();
-                auto dur = chrono::duration_cast<chrono::minutes>(end - start).count();
-                if (dur >= 10) {
-                    /* new firstFrame */
+                auto dur = chrono::duration_cast<chrono::seconds>(end - start).count();
+                if (dur >= timeInt) {
+                    /* update the firstFrame */
+                    /* so the camera is not triggered by wind/clouds/lighting changes */
                     camera.read(frame);    
                     cvtColor(frame, firstFrame, COLOR_BGR2GRAY);
                     GaussianBlur(firstFrame, firstFrame, Size(21, 21), 0);
@@ -191,13 +194,15 @@ int main()
     switch (method)
     {
         case 0:
+        /* works good, doesn't require much, usable on mini-computers, saves pictures until an "intruder" leaves (this can be changed, if needed) */
         det(camera);
         break;
         case 1:
+        /* more complex, saves only 1 picture of an "intruder" */
         detBackSub(camera);
         break;
         default:
-        cout << "Try again.";
+        cout << "Sorry.";
     }
     
     return 0;
