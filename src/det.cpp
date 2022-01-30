@@ -20,7 +20,8 @@ using namespace cv;
 using namespace std;
 
 const int port = 0;
-const int cntrArea = 10000;
+const int minArea = 10000;
+const int maxArea = 50000;
 const string path = "path\\to\\the\\folder\\";
 
 const int yr = 1900;
@@ -66,11 +67,11 @@ int main(int argc, char **argv)
         /* check if object detected */
         for (int i = 0; i < cnts.size(); i++) {
             
-            if(contourArea(cnts[i]) < cntrArea/2 or contourArea(cnts[i]) > 5*cntrArea) {
+            if(contourArea(cnts[i]) < minArea or contourArea(cnts[i]) > maxArea) {
                 /* not detected */
                 auto end = chrono::steady_clock::now();
-                auto dur = chrono::duration_cast<chrono::minutes>(end - start).count();
-                if (dur >= 15) {
+                auto dur = chrono::duration_cast<chrono::seconds>(end - start).count();
+                if (dur >= 1) {
                     /* new firstFrame */
                     /* it helps with NOT detecting change of sky colour as "motion" */
                     camera.read(frame);    
